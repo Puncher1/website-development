@@ -1,0 +1,59 @@
+body {
+  background-color: #314867;
+}
+
+table {
+  font-family: Arial;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+  width: 30%;
+}
+
+.top {
+  background-color: #bdbdbd;
+}
+
+.avg {
+  background-color: #dedede;
+  font-weight: bold;
+}
+
+
+h2 {
+  font-family: Arial;
+}
+
+.syncBtn {
+  background-image: url("./sync.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  background-size: 38px;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  border: none;
+}
+
+.rotation {
+  animation-name: spinwait;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes spinwait {
+  0% {
+      transform: rotate(0deg);
+  }
+
+  100% {
+      transform: rotate(360deg);
+  }
+}

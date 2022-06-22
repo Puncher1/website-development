@@ -1,0 +1,8 @@
+{
+  "name": "gradesApp",
+  "main": "main.js",
+  "type": "require",
+  "dependencies": {
+    "selenium-webdriver": "^4.2.0"
+  }
+}
