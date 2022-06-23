@@ -5,58 +5,78 @@ const { Browser, By, until} = require("selenium-webdriver")
 const chrome = require("selenium-webdriver/chrome")
 
 
-function initDriver(callback)
-{
+function timeout(ms) {
+  return new Promise(res => setTimeout(res, ms))
+}
+
+
+function initDriver() {
   let driver = new webdriver.Builder()
     .forBrowser(Browser.CHROME)
     .setChromeOptions(new chrome.Options().headless())
     .build()
 
-  callback(driver)
-  
+  return driver
+    
 }
 
 
 /**
  * TODO
  * 
- * @param {CallableFunction} driver 
+ * @param {webdriver.WebDriver} driver 
  */
-function eduMobile(driver, callback)
-{
-  // @ts-ignore
-  driver.get(process.env.EDU_MOBILE_URL)
+function eduMobile(driver) {
 
-  const pinEntry = driver.findElement(By.xpath('//*[@id="inputPin"]'))
-  // @ts-ignore
-  pinEntry.sendKeys(process.env.EDU_PIN)
+  return new Promise(async resolve => {
+    
+    driver.get(process.env.EDU_MOBILE_URL)
 
-  const pinOkBtn = driver.findElement(By.xpath('/html/body/div/form/input[2]'))
-  pinOkBtn.click()
+    const pinEntry = await driver.findElement(By.xpath('//*[@id="inputPin"]'))
+    await pinEntry.sendKeys(process.env.EDU_PIN)
+  
+    const pinOkBtn = await driver.findElement(By.xpath('/html/body/div/form/input[2]'))
+    await pinOkBtn.click()
 
-  setTimeout(function () 
-  {
-    let mobile_body = driver.findElement(By.xpath('/html/body'))
-    mobile_body.getText().then(function (mobiledBodyText) 
-    {
-      let upToDate = false
-      if (mobiledBodyText.indexOf("Sie haben alle Noten bestätigt.") == -1)
+    let mobileBody = await driver.findElement(By.xpath('/html/body'))
+    var upToDate = false
+
+    await mobileBody.getText().then(function(mobiledBodyText) {
+      console.log(mobiledBodyText)
+
+      if (mobiledBodyText.includes("Sie haben alle Noten bestätigt."))
       {
+        console.log("if statement")
         upToDate = true
       }
-
-      return upToDate
     })
-  }, 5000)
+    
+    resolve(upToDate)
+  })
 }
+
+
+function eduMobileGetBody(driver) {
+
+
+}
+
 
 /**
  * 
  * @param {webdriver.ThenableWebDriver} driver 
  * @param {boolean} upToDate 
  */
-function eduMain(driver, upToDate)
-{
+function eduMain(driver) {
+
+}
+
+async function main() {
+  
+  let driver = initDriver()
+  let upToDate = await eduMobile(driver)
+  
+  console.log("after edu mobile: " + upToDate)
   if (upToDate == false)
   {
     console.log("not uptodate")
@@ -65,14 +85,7 @@ function eduMain(driver, upToDate)
   {
     console.log("up to date")
   }
-}
 
-
-function main()
-{
-
-
-  
 }
 
 main()
