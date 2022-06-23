@@ -5,19 +5,23 @@ const { Browser, By, until} = require("selenium-webdriver")
 const chrome = require("selenium-webdriver/chrome")
 
 
-function timeout(ms) {
+async function timeout(ms) {
   return new Promise(res => setTimeout(res, ms))
 }
 
 
-function initDriver() {
-  let driver = new webdriver.Builder()
+async function initDriver() {
+
+  return new Promise(resolve => {
+    console.log("init")
+    let driver = new webdriver.Builder()
     .forBrowser(Browser.CHROME)
     .setChromeOptions(new chrome.Options().headless())
     .build()
 
-  return driver
-    
+    resolve(driver)
+  })
+
 }
 
 
@@ -26,7 +30,7 @@ function initDriver() {
  * 
  * @param {webdriver.WebDriver} driver 
  */
-function eduMobile(driver) {
+async function eduMobile(driver) {
 
   return new Promise(async resolve => {
     
@@ -65,7 +69,6 @@ function eduMobileGetBody(driver) {
 /**
  * 
  * @param {webdriver.ThenableWebDriver} driver 
- * @param {boolean} upToDate 
  */
 function eduMain(driver) {
 
@@ -73,7 +76,8 @@ function eduMain(driver) {
 
 async function main() {
   
-  let driver = initDriver()
+  let driver = await initDriver()
+  console.log("after init")
   let upToDate = await eduMobile(driver)
   
   console.log("after edu mobile: " + upToDate)
