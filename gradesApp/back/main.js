@@ -34,9 +34,11 @@ async function eduMobile(driver) {
 
   return new Promise(async resolve => {
     
+    // @ts-ignore
     driver.get(process.env.EDU_MOBILE_URL)
 
     const pinEntry = await driver.findElement(By.xpath('//*[@id="inputPin"]'))
+    // @ts-ignore
     await pinEntry.sendKeys(process.env.EDU_PIN)
   
     const pinOkBtn = await driver.findElement(By.xpath('/html/body/div/form/input[2]'))
