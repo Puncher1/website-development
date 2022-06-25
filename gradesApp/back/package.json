@@ -3,6 +3,7 @@
   "main": "main.js",
   "type": "require",
   "dependencies": {
+    "prompt-sync": "^4.2.0",
     "selenium-webdriver": "^4.2.0"
   }
 }
