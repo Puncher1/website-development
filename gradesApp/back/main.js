@@ -6,6 +6,53 @@ const chrome = require("selenium-webdriver/chrome")
 const exec = require("child_process").exec
 const prompt = require("prompt-sync")({ sigint: true })
 
+
+/**
+ * 
+ * @param {String} grade 
+ */
+async function roundGrade(grade) { 
+    return new Promise(resolve => {
+        let grade_ = parseFloat(grade)
+        let roundedGrade
+        let noContinue = false
+        
+        if (isNaN(grade_)) {
+            roundedGrade = grade
+            noContinue = true
+        }
+
+        if (!noContinue) {
+            // @ts-ignore
+            let gradeDigit = grade_ - parseInt(grade_)
+
+            if (gradeDigit == 0.25) {
+                // @ts-ignore
+                roundedGrade = (parseInt(grade_) + 0.5).toString()
+            }
+            else {
+                // @ts-ignore
+                roundedGrade = (Math.round(grade_ * 2) / 2).toString()
+            }
+        }
+
+        console.log(`${grade}: ${roundedGrade}`)
+        resolve(roundedGrade)
+    })   
+   
+}
+
+class Subject {
+    constructor(name, abbr, type, exams, gradeAvgRaw, gradeAvgRound) {
+        this.name = name
+        this.abbr = abbr
+        this.type = type
+        this.exams = exams
+        this.gradeAvgRaw = gradeAvgRaw
+        this.gradeAvgRound = gradeAvgRound
+    }
+}
+
 /**
  * TODO
  * @param {webdriver.WebElement} element 
@@ -18,6 +65,27 @@ async function getElementText(element) {
 
     })
 
+}
+
+
+/**
+ * 
+ * @param {String} subjectName 
+ * @param {String} subjectAbbr 
+ */
+async function getSubjectType(subjectName, subjectAbbr) {
+    return new Promise (resolve => {
+        let subjectType = "bm"
+        if (["Bereichsübergreifende Projekte", "Elektrotechnik", "Hard- und Softwaretechnik", "Werkstoff- und Zeichnungstechnik", "Sport"].includes(subjectName)) {
+            if (subjectAbbr.toLowerCase().includes("spbm")) {
+                subjectType = "bm"
+            }
+            else {
+                subjectType = "job"
+            }
+        }
+        resolve(subjectType)
+    })
 }
 
 
@@ -114,6 +182,8 @@ async function eduMain(driver) {
         if (otpNeeded) {
             exec('"C:/Users/andri/AppData/Local/authy/Authy Desktop.exe"',
                 function (error, stdout, stderr) {
+
+
                     if (error !== null) {
                         console.log('exec error: ' + error);
                     }
@@ -161,9 +231,9 @@ async function scrapeData(driver) {
             let notClicking = false
             let buttonDetail = await driver.findElement(By.xpath(`//*[@id="einzelpr_btn_0_${i}"]`))
                 .then(null, function(err) {
-                if (err.name === "NoSuchElementError") {
-                    notClicking = true
-                }
+                    if (err.name === "NoSuchElementError") {
+                        notClicking = true
+                    }
                 })
             
             if (!notClicking) {
@@ -176,9 +246,9 @@ async function scrapeData(driver) {
         subjectRows = []
         let subjectRowCount_ = subjectRowCount
         i = 0
-        while (i < subjectRowCount) {
+        while (i < subjectRowCount_) {
             let noContinue = false
-            let subjectElementTest = await driver.findElement(By.xpath('//*[@id="uebersicht_bloecke"]/page/div/table/tbody/tr[{i}]/td[4]'))
+            let subjectElementTest = await driver.findElement(By.xpath(`//*[@id="uebersicht_bloecke"]/page/div/table/tbody/tr[${i}]/td[4]`))
                 .then(null, function(err) {
                     if (err.name === "NoSuchElementError") {
                         subjectRowCount_++
@@ -225,10 +295,146 @@ async function scrapeData(driver) {
 
             i += 3
         }
-
-        console.log("subjectRows: " + subjectRows)
-        console.log("detailRows: " + detailRows)
+        
+        resolve([subjectRows, detailRows])
     })
+}
+
+
+async function manageData(subjectRows, detailRowsList) {
+    return new Promise(async resolve => {
+        let detailTexts = []
+        for (const detailRows of detailRowsList) {
+
+            let detailRowTexts = []
+            for (const detailRow of detailRows) {
+                let detailRowElements = await detailRow.findElements(By.css("td"))
+
+                let detailRowElementTexts = []
+                let skipElements = false
+                for (const detailRowElement of detailRowElements) {
+                    let detailRowElementText = await getElementText(detailRowElement)
+
+                    if (["Aktueller Durchschnitt:", "Datum"].includes(detailRowElementText)) {
+                        skipElements = true
+                        break
+                    } 
+
+                    detailRowElementTexts.push(detailRowElementText)
+                }
+
+                if (skipElements) {
+                    skipElements = false
+                    continue
+                }
+
+                detailRowTexts.push(detailRowElementTexts)
+
+            }
+
+            detailTexts.push(detailRowTexts)
+        }
+
+        let subjectTexts = []
+        for (const subjectRow of subjectRows) {
+            let subjectRowElements = await subjectRow.findElements(By.css("td"))
+
+            let subjectRowElementTexts = []
+            for (const subjectRowElement of subjectRowElements) {
+                let subjectRowElementText = await getElementText(subjectRowElement)
+                subjectRowElementTexts.push(subjectRowElementText)
+            }
+            subjectTexts.push(subjectRowElementTexts)
+        }
+
+        resolve([subjectTexts, detailTexts])
+    })
+}
+
+
+async function buildObjects(subjectTexts, detailTexts) {
+    return new Promise(async resolve => {
+        
+        let subjObjects = []
+        let zippedSubject = subjectTexts.map(function(e, i) {
+            return [e, detailTexts[i]]
+        })
+        for (const [subjectText, subjectDetails] of zippedSubject) {
+            let subjectNameAndAbbr = subjectText[0].split("\n")
+            let subjectAbbr = subjectNameAndAbbr[0]
+            let subjectName = subjectNameAndAbbr[1]
+            let subjectAvgGrade = subjectText[1]
+            let subjectType = await getSubjectType(subjectName, subjectAbbr)
+            
+            let dictExams = {}
+            for (const exam of subjectDetails) {
+                let examDate = exam[0]
+                let examName = exam[1]
+                let examGrade = exam[2]
+                let examWeight = exam[3]
+                let examClassAvg = exam[4]
+
+                dictExams[examName] = {"date": examDate, "grade": examGrade, "weight": examWeight, "classAvg": examClassAvg}
+            }
+            
+            const subj_obj = new Subject(subjectName, subjectAbbr, subjectType, dictExams, subjectAvgGrade, await roundGrade(subjectAvgGrade))
+            subjObjects.push(subj_obj)
+        }
+        
+        resolve(subjObjects)
+    })
+
+}
+
+
+async function calcTypeAvg(subjObjects) {
+    return new Promise(async resolve => {
+        let bmAvg = 0
+        let bmAvgRound = 0
+        let jobAvg = 0
+        let jobAvgRound = 0
+    
+        let bmCount = 0
+        let jobCount = 0
+        for (const subjObj of subjObjects) {
+            console.log(subjObj.name + ": " + subjObj.gradeAvgRaw + ", " + subjObj.gradeAvgRound)
+
+            let subjGradeRaw = parseFloat(subjObj.gradeAvgRaw)
+            let subjGradeRounded = parseFloat(subjObj.gradeAvgRound)
+            
+            if (isNaN(subjGradeRaw) || isNaN(subjGradeRounded)) {
+                continue
+            }
+
+            if (subjObj.type == "bm") {
+                bmAvg += subjGradeRaw
+                bmAvgRound += subjGradeRounded
+                bmCount++
+            }
+            else {
+                jobAvg += subjGradeRaw
+                jobAvgRound += subjGradeRounded
+                jobCount++
+            }
+        }
+    
+        bmAvg /= bmCount
+        bmAvg = Math.round((bmAvg + Number.EPSILON) * 100) / 100
+        bmAvgRound /= bmCount
+        bmAvgRound = Math.round((bmAvgRound + Number.EPSILON) * 10) / 10
+    
+        jobAvg /= jobCount
+        jobAvg = Math.round((jobAvg + Number.EPSILON) * 100) / 100
+        jobAvgRound /= jobCount
+        jobAvgRound = Math.round((jobAvgRound + Number.EPSILON) * 10) / 10
+        
+
+        const bmAvgs = [bmAvg, bmAvgRound]
+        const jobAvgs = [jobAvg, jobAvgRound]
+
+        resolve([bmAvgs, jobAvgs])
+    })
+
 }
 
 
@@ -236,11 +442,25 @@ async function main() {
 
     let driver = await initDriver()
     console.log("after init")
-    let upToDate = await eduMobile(driver)
 
+    const upToDate = await eduMobile(driver)
     console.log("after edu mobile: " + upToDate)
+
     await eduMain(driver)
-    await scrapeData(driver)
+    console.log("after edu main")
+
+    const [subjectRows, detailRows] = await scrapeData(driver)
+    console.log("after scrape data")
+
+    const [subjectTexts, detailTexts] = await manageData(subjectRows, detailRows)
+    console.log("after manage data")
+
+    const subjObjects = await buildObjects(subjectTexts, detailTexts)
+    console.log("after build objects")
+
+    const [[bmAvg, bmAvgRound], [jobAvg, jobAvgRound]] = await calcTypeAvg(subjObjects)
+    console.log("bmAvgs: " + bmAvg + ", " + bmAvgRound)
+    console.log("jobAvgs: " + jobAvg + ", " + jobAvgRound)
 
     // if (upToDate == false)
     // {
