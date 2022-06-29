@@ -1,10 +1,12 @@
 require("dotenv").config()
 
+const { exit } = require("process")
 const webdriver = require("selenium-webdriver")
 const { Browser, By, until} = require("selenium-webdriver")
 const chrome = require("selenium-webdriver/chrome")
 const exec = require("child_process").exec
 const prompt = require("prompt-sync")({ sigint: true })
+const jsonfile = require("jsonfile")
 
 
 /**
@@ -397,8 +399,6 @@ async function calcTypeAvg(subjObjects) {
         let bmCount = 0
         let jobCount = 0
         for (const subjObj of subjObjects) {
-            console.log(subjObj.name + ": " + subjObj.gradeAvgRaw + ", " + subjObj.gradeAvgRound)
-
             let subjGradeRaw = parseFloat(subjObj.gradeAvgRaw)
             let subjGradeRounded = parseFloat(subjObj.gradeAvgRound)
             
@@ -446,6 +446,10 @@ async function main() {
     const upToDate = await eduMobile(driver)
     console.log("after edu mobile: " + upToDate)
 
+    // if (upToDate) {
+    //     console.log("UP TO DATE!")
+    // }
+
     await eduMain(driver)
     console.log("after edu main")
 
@@ -459,17 +463,31 @@ async function main() {
     console.log("after build objects")
 
     const [[bmAvg, bmAvgRound], [jobAvg, jobAvgRound]] = await calcTypeAvg(subjObjects)
-    console.log("bmAvgs: " + bmAvg + ", " + bmAvgRound)
-    console.log("jobAvgs: " + jobAvg + ", " + jobAvgRound)
 
-    // if (upToDate == false)
-    // {
-    //   console.log("not uptodate")
-    // }
-    // else
-    // {
-    //   console.log("up to date")
-    // }
+    const dataFile = "./data.json"
+    let dataJson = {}
+    dataJson["bmAvg"] = [bmAvg.toString(), bmAvgRound.toString()] 
+    dataJson["jobAvg"] = [jobAvg.toString(), jobAvgRound.toString()]
+    dataJson["subjects"] = {}
+    for (const subjObj of subjObjects) {
+        dataJson["subjects"][subjObj.abbr] = {"gradeAvgRaw": subjObj.gradeAvgRaw, "gradeAvgRound": subjObj.gradeAvgRound, "exams": subjObj.exams}
+    }
+
+    jsonfile.writeFile(dataFile, JSON.stringify(dataJson, null, 2
+        ), function(err) {
+        if (err) {
+            console.log(err)
+        }
+    })
+
+    jsonfile.readFile(dataFile, function(err, obj) {
+        if (err) {
+            console.log(err)
+        }
+        else {
+            console.log(obj)
+        }
+    })
 
 }
 
