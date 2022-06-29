@@ -131,3 +131,6 @@ dist
 
 # IDE
 .idea
+
+# gradesApp
+gradesApp/back/data.json
