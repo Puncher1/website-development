@@ -1,15 +1,14 @@
 body {
-  background-color: #314867;
+  font-family: Arial;
 }
 
 table {
-  font-family: Arial;
   border-collapse: collapse;
   width: 100%;
 }
 
 td, th {
-  border: 1px solid #dddddd;
+  border: 1px solid #aaaaaa;
   text-align: left;
   padding: 8px;
   width: 30%;
@@ -24,13 +23,12 @@ td, th {
   font-weight: bold;
 }
 
-
-h2 {
-  font-family: Arial;
+.subject {
+    background-color: #ffffff;
 }
 
 .syncBtn {
-  background-image: url("./sync.png");
+  background-image: url("./images/sync.png");
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
@@ -38,7 +36,8 @@ h2 {
   height: 50px;
   width: 50px;
   border-radius: 50%;
-  border: none;
+  border-width: 1px;
+  /* border: none; */
 }
 
 .rotation {
