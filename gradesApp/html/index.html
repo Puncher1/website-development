@@ -4,13 +4,12 @@
     <meta charset="utf-8">
     <meta viewpoint="viewport" content="widt=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="#">
-    <link href="./style/styles.css" rel="stylesheet" type="text/css">
-    <base href="/">
+    <link href="{{ url_for('static', filename='style/styles.css') }}" rel="stylesheet" type="text/css">
     <title></title>    
   </head>
   <body>
     <h2 id="title">Aktuelle Noten</h2>
-    <button id="syncBtn" class="syncBtn" onclick="foo()"></button>
+    <button id="syncBtn" class="syncBtn"></button>
     <table id="gradesTable">
       <tr>
         <th class="top">Fach</th>
@@ -18,6 +17,6 @@
         <th class="top">Notendurchschnitt (gerundet)</th>
       </tr>
     </table>
-    <script type="text/javascript" src="./scripts/main.js"></script>    
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/main.js') }}"></script>
   </body>
 </html>

@@ -349,28 +349,28 @@
 import os
 from flask import Flask, redirect, url_for, render_template, request
 
-template_dir = os.path.abspath("./../client")
-app = Flask(__name__, template_folder=template_dir)
+template_folder = os.path.abspath("./html")
 
-@app.route("/")
+app = Flask(__name__, template_folder=template_folder)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template("index_flask.html")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
     if request.method == "POST":
-        user_name = request.form["nm"]
-        return redirect(url_for("user", usr=user_name))
+        print("POST received")
+
+        request_type = request.json["getData"]
+        if request_type == "grades":
+            print("return grades here")
+
+            return {"hello": "world"}
+        else:
+            return None         # throws Internal Server error
+
     else:
-        return render_template("login.html")
-
-
-@app.route("/<usr>")
-def user(usr):
-    return f"<h1>{usr}</h1>"
-
+        print("not POST")
+        return render_template("index.html")
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
