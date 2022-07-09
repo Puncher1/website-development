@@ -279,3 +279,4 @@ dmypy.json
 cython_debug/
 
 # gradesApp
+gradesApp/json/
