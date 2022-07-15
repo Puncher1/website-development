@@ -4,3 +4,5 @@ peewee
 flask
 Flask-Session
 redis
+selenium
+webdriver-manager

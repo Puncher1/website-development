@@ -1,17 +1,78 @@
 body {
   font-family: Arial;
+  background-color: #1c215e;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
+.container {
+    background-color: #5b64de;
+    padding: 3px;
+    padding-top: 0px;
+    border: 4px solid #3e46a8;
+    border-radius: 5px;
 }
 
+.title {
+    font-size: 30px;
+    padding-left: 12px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+.sync-container {
+    display: flex;
+    padding-left: 11px;
+}
+
+.syncIcon-container {
+    margin-left: auto;
+    margin-right: 15px;
+    margin-top: auto;
+}
+
+.syncBtn-container {
+    padding-bottom: 2px;
+    margin-bottom: auto;
+}
+
+.syncBtn {
+    width: 60px;
+    height: 30px;
+    border-radius: 5px;
+    font-size: 13px;
+    border: 3px solid #1c215e;
+    color: transparent;
+    text-shadow: 0 0 #9fa6fc;
+    background-color: #1c215e;
+    transition: text-shadow 0.3s, background-color 0.3s;
+}
+
+.syncBtn:hover {
+    background-color: transparent;
+    text-shadow: 0 0 black;
+}
+
+.syncBtn:active {
+    color: #3e46a8;
+    border-color: #3e46a8;
+}
+
+.syncBtn:disabled {
+    border-color: #555555;
+    background-color: #555555;
+    color: #dbdbdb;
+}
+
+.gradesTable {
+    padding-left: 10px; 
+    padding-right: 10px;
+    width: 100%;
+}
+  
 td, th {
-  border: 1px solid #aaaaaa;
-  text-align: left;
-  padding: 8px;
-  width: 30%;
+    border: 1px solid #aaaaaa;
+    text-align: left;
+    padding: 8px;
+    width: 30%;
 }
 
 .top {
@@ -25,19 +86,6 @@ td, th {
 
 .subject {
     background-color: #ffffff;
-}
-
-.syncBtn {
-  background-image: url("./images/sync.png");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: transparent;
-  background-size: 38px;
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
-  border-width: 1px;
-  /* border: none; */
 }
 
 .rotation {

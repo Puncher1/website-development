@@ -4,19 +4,29 @@
     <meta charset="utf-8">
     <meta viewpoint="viewport" content="widt=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css"/>
     <link href="{{ url_for('static', filename='style/grades_styles.css') }}" rel="stylesheet" type="text/css">
     <title></title>    
   </head>
   <body>
-    <h2 id="title">Aktuelle Noten</h2>
-    <button id="syncBtn" class="syncBtn"></button>
-    <table id="gradesTable">
-      <tr>
-        <th class="top">Fach</th>
-        <th class="top">Notendurchschnitt</th>
-        <th class="top">Notendurchschnitt (gerundet)</th>
-      </tr>
-    </table>
+    <div class="container">
+        <h2 id="title" class="title">Aktuelle Noten</h2>
+        <div class="sync-container">
+            <div class="syncBtn-container">
+                <button id="syncBtn" class="syncBtn" disabled>Sync</button>
+            </div>
+            <div class="syncIcon-container">
+                <i id="syncIcon" class="ms-Icon ms-Icon--Sync syncIcon rotation" aria-hidden="true"></i>
+            </div>
+        </div>
+        <table id="gradesTable" class="gradesTable">
+            <tr>
+                <th class="top">Fach</th>
+                <th class="top">Notendurchschnitt</th>
+                <th class="top">Notendurchschnitt (gerundet)</th>
+            </tr>
+        </table>
+    </div>
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/grades.js') }}"></script>
   </body>
 </html>
