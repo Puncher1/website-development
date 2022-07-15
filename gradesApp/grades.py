@@ -347,29 +347,79 @@
 #     main()
 
 import os
-from flask import Flask, redirect, url_for, render_template, request
+
+import redis
+from flask import Flask, redirect, url_for, render_template, request, session
+from flask_session import Session
+
+from database import Login
+
 
 template_folder = os.path.abspath("./html")
 
 app = Flask(__name__, template_folder=template_folder)
+app.secret_key = os.getenv("APP_SECRET_KEY")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_REDIS"] = redis.from_url("redis://localhost:6379")
+
+server_session = Session(app)
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if "is_redirect" in session:
+        return redirect(url_for("grades"))
+
     if request.method == "POST":
-        print("POST received")
+        request_json = request.json["request"]
+        request_type = request_json["type"]
 
-        request_type = request.json["getData"]
-        if request_type == "grades":
-            print("return grades here")
+        if request_type == "set":
+            request_data = request_json["data"]
+            user = request_data["username"]
+            pw = request_data["password"]
 
-            return {"hello": "world"}
+            query = Login.select().where(Login.user == user)
+
+            valid_login = True
+            if not query.exists():
+                valid_login = False
+
+            else:
+                result = query.get()
+                grades_pw = result.pw
+
+                if not grades_pw == pw:
+                    valid_login = False
+
+            if valid_login:
+                session["is_redirect"] = True
+                return {"status": "ok"}
+            else:
+                return {"status": "invalid"}
+
         else:
             return None         # throws Internal Server error
 
     else:
-        print("not POST")
-        return render_template("index.html")
+        return render_template("login.html")
+
+
+@app.route("/grades")
+def grades():
+    if request.method == "GET":
+        if "is_redirect" in session:
+            return render_template("grades.html")
+        else:
+            return redirect(url_for("login"))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta viewpoint="viewport" content="widt=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="#">
+        <link href="{{ url_for('static', filename='style/login_styles.css') }}" rel="stylesheet" type="text/css">
+        <title>Login - Andrin Schaller</title>    
+    </head>
+    <body>
+        <div class="login-form">
+            <h1 class="title">Login</h1>
+            <div class="input-group">
+                <input type="text" id="user" class="user-input" required>
+                <label for="user" class="user-label">Username</label>
+                
+                <input type="password" id="pw" class="pw-input" required>
+                <label for="pw" class="pw-label">Password</label>
+                
+            <span id="login-failed" class="login-failed"></span>
+            <button type="submit" id="submitBtn" class="submitBtn" >Login</button>
+            </div>
+        </div>
+        <script type="text/javascript" src="{{ url_for('static', filename='scripts/login.js') }}"></script>
+    </body>
+</html>
