@@ -18,6 +18,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
 
+
 def round_grade(grade: str):
     try:
         grade = float(grade)
@@ -74,55 +75,71 @@ def init_driver():
 
     return driver
 
-def edu_mobile(driver: webdriver.Chrome):
-    driver.get(os.getenv("EDU_MOBILE_URL"))
 
-    pin_entry = driver.find_element(by=By.XPATH, value='//*[@id="inputPin"]')
+class SeleniumWebdriver:
+    def __init__(self):
+        self.driver = init_driver()
+
+    def reopen(self):
+        self.driver.close()
+        self.driver = init_driver()
+
+
+sel_driver = SeleniumWebdriver()
+
+
+def edu_mobile():
+    sel_driver.driver.get(os.getenv("EDU_MOBILE_URL"))
+
+    pin_entry = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="inputPin"]')
     pin_entry.send_keys(os.getenv("EDU_PIN"))
 
-    pin_ok_btn = driver.find_element(by=By.XPATH, value='/html/body/div/form/input[2]')
+    pin_ok_btn = sel_driver.driver.find_element(by=By.XPATH, value='/html/body/div/form/input[2]')
     pin_ok_btn.click()
 
-    mobile_body = driver.find_element(by=By.XPATH, value='/html/body')
+    mobile_body = sel_driver.driver.find_element(by=By.XPATH, value='/html/body')
     print(mobile_body.text)
     up_to_date = False
 
-    if "Sie haben alle Noten bestätigt." in mobile_body.text:  # TODO: remove 'not'
+    if not "Sie haben alle Noten bestätigt." in mobile_body.text:  # TODO: remove 'not'
         up_to_date = True
 
     return up_to_date
 
 
-def edu_main(driver):
-    driver.get(os.getenv("EDU_URL"))
+def check_code_needed():
+
+    sel_driver.reopen()
+    sel_driver.driver.get(os.getenv("EDU_URL"))
 
     code_needed = True
     try:
-        otp_button = driver.find_element(by=By.XPATH, value='//*[@id="form-container"]/div[5]/div/a/span')
+        otp_button = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="form-container"]/div[5]/div/a/span')
     except selenium.common.NoSuchElementException:
         code_needed = False
 
-    username_entry = driver.find_element(by=By.XPATH, value='//*[@id="form-holder"]/div/form/div[1]/input')
-    username_entry.send_keys(os.getenv("EDU_USERNAME"))
-
-    password_entry = driver.find_element(by=By.XPATH, value='//*[@id="form-holder"]/div/form/div[2]/input')
-    password_entry.send_keys(os.getenv("EDU_PASSWORD"))
-
-    button = driver.find_element(by=By.XPATH, value='//*[@id="form-actions"]/div/button')
-    button.click()
-
     if code_needed:
-        code_input = input("Please enter SMS code: ")
-        print(f"{code_input=}")
+        username_entry = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="form-holder"]/div/form/div[1]/input')
+        username_entry.send_keys(os.getenv("EDU_USERNAME"))
 
-        code_entry = driver.find_element(by=By.XPATH, value='//*[@id="form-holder"]/div/form/div[1]/input')      # TODO: entry for SMS code
-        code_entry.send_keys(code_input)
+        password_entry = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="form-holder"]/div/form/div[2]/input')
+        password_entry.send_keys(os.getenv("EDU_PASSWORD"))
 
-        sms_button = driver.find_element(by=By.XPATH, value='//*[@id="form-actions"]/div/button')               # TODO: button for SMS code
+        button = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="form-actions"]/div/button')
+        button.click()
+
+    return code_needed
+
+
+def edu_main(code=None):
+    if code:
+        code_entry = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="form-holder"]/div[1]/form/div[1]/input')
+        code_entry.send_keys(code)
+
+        sms_button = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="form-actions"]/div/button')
         sms_button.click()
 
-    grades_button = driver.find_element(by=By.XPATH, value='//*[@id="menu21311"]')
-    print(grades_button.text)
+    grades_button = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="menu21311"]')
     grades_button.click()
 
 
@@ -191,8 +208,8 @@ def manage_data(subject_rows, detail_list_rows) -> Tuple[list, list]:
 
     return subject_texts, detail_texts
 
-def scrape_data(driver) -> Tuple[list, list]:
-    grades_table = driver.find_element(by=By.XPATH, value='//*[@id="uebersicht_bloecke"]/page/div/table')
+def scrape_data() -> Tuple[list, list]:
+    grades_table = sel_driver.driver.find_element(by=By.XPATH, value='//*[@id="uebersicht_bloecke"]/page/div/table')
     subject_rows = grades_table.find_elements(By.TAG_NAME, "tr")
 
     subj_row_count = 0
@@ -206,7 +223,7 @@ def scrape_data(driver) -> Tuple[list, list]:
     i = 0
     while i <= subj_row_count:
         try:
-            button_detail = driver.find_element(by=By.XPATH, value=f'//*[@id="einzelpr_btn_0_{i}"]')
+            button_detail = sel_driver.driver.find_element(by=By.XPATH, value=f'//*[@id="einzelpr_btn_0_{i}"]')
         except selenium.common.NoSuchElementException:
             pass
         else:
@@ -219,13 +236,13 @@ def scrape_data(driver) -> Tuple[list, list]:
     i = 0
     while i < subj_row_count_:
         try:
-            subject_element_test = driver.find_element(by=By.XPATH,
+            subject_element_test = sel_driver.driver.find_element(by=By.XPATH,
                                                        value=f'//*[@id="uebersicht_bloecke"]/page/div/table/tbody/tr[{i}]/td[4]')
         except selenium.common.NoSuchElementException:
             subj_row_count_ += 1
         else:
             try:
-                subject_row = driver.find_element(by=By.XPATH,
+                subject_row = sel_driver.driver.find_element(by=By.XPATH,
                                                   value=f'//*[@id="uebersicht_bloecke"]/page/div/table/tbody/tr[{i}]')
             except selenium.common.NoSuchElementException:
                 subject_rows.append("")
@@ -238,7 +255,7 @@ def scrape_data(driver) -> Tuple[list, list]:
     i = 3
     while i <= (subj_row_count * 3):
         try:
-            detail_table = driver.find_element(by=By.XPATH,
+            detail_table = sel_driver.driver.find_element(by=By.XPATH,
                                                value=f'//*[@id="uebersicht_bloecke"]/page/div/table/tbody/tr[{i}]/td/table')
             detail_table_rows = detail_table.find_elements(By.TAG_NAME, "tr")
 
@@ -292,9 +309,9 @@ def calc_type_avg(subj_objects: List[Subject]) -> Tuple[Tuple[int, int], Tuple[i
     return bm_avgs, job_avgs
 
 
-def sync():
-    edu_main(driver)
-    subject_rows, detail_rows = scrape_data(driver)
+def sync(code=None):
+    edu_main(code)
+    subject_rows, detail_rows = scrape_data()
     subject_texts, detail_texts = manage_data(subject_rows, detail_rows)
     subj_objects = build_objects(subject_texts, detail_texts)
 
@@ -347,7 +364,6 @@ app.config["SESSION_REDIS"] = redis.from_url("redis://localhost:6379")
 
 server_session = Session(app)
 
-driver = init_driver()
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -396,89 +412,61 @@ def login():
 
 @app.route("/grades", methods=["GET", "POST"])
 def grades():
-    if request.method == "POST":
+    if request.method == "GET":
+        if "is_redirect" in session:
+            return render_template("grades.html")
+        else:
+            return redirect(url_for("login"))
+
+    elif request.method == "POST":
+        session["wait_until_finished"] = True
         request_json = request.json["request"]
         request_type = request_json["type"]
         request_data = request_json["data"]
 
         if request_type == "get":
             if request_data == "update_needed":
-                up_to_date = edu_mobile(driver)
-
-                if up_to_date:
-                    print("not update_needed")
-                    return {"status": "false"}
+                try:
+                    up_to_date = edu_mobile()
+                except BaseException as e:
+                    print(e)
+                    return {"status": "failed"}
                 else:
-                    print("update_needed")
-                    return {"status": "true"}
+                    if up_to_date:
+                        print("not update_needed")
+                        return {"status": "false"}
+                    else:
+                        print("update_needed")
+                        return {"status": "true"}
 
             elif request_data == "grades":
-                time.sleep(3)
-
-                data = {
-                    "bmAvg": ["4.79", "4.8"],
-                    "jobAvg": ["5.05", "5.0"],
-                    "subjects": {
-                        "BEPR-ELO2-HEPH": {
-                            "name": "Bereichsübergreifende Projekte",
-                            "type": "job",
-                            "gradeAvgRaw": "4.767",
-                            "gradeAvgRound": "5",
-                            "exams": {},
-
-                        },
-                        "CH-BMP2-BRUT": {
-                            "name": "Chemie",
-                            "type": "bm",
-                            "gradeAvgRaw": "3.545",
-                            "gradeAvgRound": "3.5",
-                            "exams": {},
-
-                        }
-                    }
-                }
-
-                code_needed = False
-                if code_needed:
-                    return {"status": "true"}
+                try:
+                    code_needed = check_code_needed()
+                except BaseException as e:
+                    print(e)
+                    return {"status": "failed"}
                 else:
-                    return {"status": "false", "data": data}
+                    if code_needed:
+                        return {"status": "true"}
+                    else:
+                        try:
+                            data = sync()
+                        except BaseException as e:
+                            print(e)
+                            return {"status": "failed"}
+                        else:
+                            return {"status": "false", "data": data}
 
         elif request_type == "set":
             if request_data[0] == "code":
                 code = request_data[1]
-                print(code)
-                time.sleep(3)
-                data = {
-                    "bmAvg": ["4.79", "4.8"],
-                    "jobAvg": ["5.05", "5.0"],
-                    "subjects": {
-                        "BEPR-ELO2-HEPH": {
-                            "name": "Bereichsübergreifende Projekte",
-                            "type": "job",
-                            "gradeAvgRaw": "4.767",
-                            "gradeAvgRound": "5",
-                            "exams": {},
-
-                        },
-                        "CH-BMP2-BRUT": {
-                            "name": "Chemie",
-                            "type": "bm",
-                            "gradeAvgRaw": "3.545",
-                            "gradeAvgRound": "3.5",
-                            "exams": {},
-
-                        }
-                    }
-                }
-
-                return {"data": data}
-
-    else:
-        if "is_redirect" in session:
-            return render_template("grades.html")
-        else:
-            return redirect(url_for("login"))
+                try:
+                    data = sync(code)
+                except BaseException as e:
+                    print(e)
+                    return {"status": "failed"}
+                else:
+                    return {"status": "ok", "data": data}
 
 
 if __name__ == "__main__":
