@@ -9,11 +9,11 @@
     <title></title>    
   </head>
   <body>
-    <div class="container">
+    <div id="container" class="container">
         <h2 id="title" class="title">Aktuelle Noten</h2>
         <div class="sync-container">
             <div class="syncBtn-container">
-                <button id="syncBtn" class="syncBtn" disabled>Sync</button>
+                <button id="syncBtn" class="syncBtn-disabled syncBtn-blockedCursor" disabled>Sync</button>
             </div>
             <div class="syncIcon-container">
                 <i id="syncIcon" class="ms-Icon ms-Icon--Sync syncIcon rotation" aria-hidden="true"></i>
@@ -26,6 +26,15 @@
                 <th class="top">Notendurchschnitt (gerundet)</th>
             </tr>
         </table>
+    </div>
+    <div id="codeModal" class="codeModal animate-modal">
+        <div class="codeModal-content">
+            <div class="code-container">
+                <input type="number" id="code" oninput="javascript: if (this.value.length > 6) this.value = this.value.slice(0, this.maxLength);" class="code-input"required>
+                <label for="code" class="code-label">Code</label>
+            <button type="send" id="sendBtn" class="sendBtn" >Senden</button>
+            </div>
+        </div>
     </div>
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/grades.js') }}"></script>
   </body>
