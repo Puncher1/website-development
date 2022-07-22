@@ -96,7 +96,7 @@ function closeCodeModal() {
  */ 
  function load() {
     document.getElementById("syncBtn").addEventListener("click", sync, false)
-    document.getElementById("sendBtn")
+    document.getElementById("sendBtn").addEventListener("click", syncWithCode, false)
     checkForUpdate()
 }
 
