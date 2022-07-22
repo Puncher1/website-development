@@ -1,4 +1,10 @@
-let login = function () {
+let enterLogin = function(event) {
+    if (event.key === "Enter") {
+        document.getElementById("submitBtn").click()
+    }
+}
+
+let login = function() {
     let user = document.getElementById("user").value
     let pw = document.getElementById("pw").value
 
@@ -20,7 +26,7 @@ let login = function () {
     }
 
     if (isUserEmpty || isPwEmpty) {
-        document.getElementById("login-failed").innerHTML = "This field is required."
+        document.getElementById("login-failed").innerHTML = "Dieses Feld ist erforderlich."
     }
     else {
         document.getElementById("submitBtn").disabled = true
@@ -39,7 +45,7 @@ let login = function () {
             document.getElementById("submitBtn").disabled = false
             document.getElementById("loading-dots").style.display = "none"
             if (rawResponse["status"] == "invalid") {
-                document.getElementById("login-failed").innerHTML = "Invalid username or password."
+                document.getElementById("login-failed").innerHTML = "Benutzername/Passwort ungültig."
                 document.getElementById("user").style.borderColor = "#9c0606"
                 document.getElementById("pw").style.borderColor = "#9c0606"
             }
@@ -61,6 +67,8 @@ let login = function () {
  */ 
 function load() {
     document.getElementById("submitBtn").addEventListener("click", login, false)
+    document.addEventListener("keyup", enterLogin, false)
+
 }
 
 window.onload = load
