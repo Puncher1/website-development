@@ -62,36 +62,6 @@ body {
     margin-top: 70px;
 }
 
-.submitBtn {
-    position: absolute;
-    display: block;
-    left: 0; 
-    right: 0; 
-    margin-left: auto; 
-    margin-right: auto; 
-    width: 225px;
-    height: 40px;
-    border: 3px solid #1c215e;
-    border-radius: 5px;
-    color: transparent;
-    text-shadow: 0 0 #9fa6fc;
-    background-color: #1c215e;
-    font-size: 16px;
-    margin-top: 150px;
-    transition: text-shadow 0.3s, background-color 0.3s;
-}
-
-.submitBtn:hover {
-    background-color: transparent;
-    text-shadow: 0 0 black;
-}
-
-.submitBtn:active {
-    color: #3e46a8;
-    border-color: #3e46a8;
-}
-
-
 .user-label, .pw-label {
     position: absolute;
     background-color: #5b64de;
@@ -123,19 +93,6 @@ body {
     padding-left: 5px;
 }
 
-
-.login-failed {
-    font-size: 14px;
-    color: #9c0606;
-    position: absolute;
-    width: 300px;
-    left: 0;
-    right: 0;
-    margin-top: 115px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .user-input:-webkit-autofill,
 .user-input:-webkit-autofill:hover, 
 .user-input:-webkit-autofill:focus, 
@@ -147,3 +104,110 @@ body {
     -webkit-box-shadow: 0 0 0 30px #5b64de inset !important;
 }
 
+.login-status {
+    text-align: center;
+    height: 70%;
+}
+
+.loading-dots {
+    display: none;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 24%;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #1c215e;
+    color: #1c215e;
+    animation: loading-dots 1s infinite linear alternate;
+    animation-delay: .5s;
+  }
+  
+  .loading-dots::before, .loading-dots::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+  }
+  
+  .loading-dots::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #1c215e;
+    color: #1c215e;
+    animation: loading-dots 1s infinite alternate;
+    animation-delay: 0s;
+  }
+  
+  .loading-dots::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #1c215e;
+    color: #1c215e;
+    animation: loading-dots 1s infinite alternate;
+    animation-delay: 1s;
+  }
+  
+  @keyframes loading-dots {
+    0% {
+      background-color: #1c215e;
+    }
+    50%,
+    100% {
+      background-color: #434bb5;
+    }
+  }
+
+.login-failed {
+    font-size: 14px;
+    color: #9c0606;
+    position: absolute;
+    width: 300px;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 23%;
+}
+
+.submitBtn {
+    position: absolute;
+    display: block;
+    left: 0; 
+    right: 0; 
+    margin-left: auto; 
+    margin-right: auto; 
+    width: 225px;
+    height: 40px;
+    border: 3px solid #1c215e;
+    border-radius: 5px;
+    color: transparent;
+    text-shadow: 0 0 #9fa6fc;
+    background-color: #1c215e;
+    font-size: 16px;
+    transition: text-shadow 0.3s, background-color 0.3s;
+}
+
+.submitBtn:hover {
+    background-color: transparent;
+    text-shadow: 0 0 black;
+}
+
+.submitBtn:active {
+    color: #3e46a8;
+    border-color: #3e46a8;
+}
+
+.submitBtn:disabled {
+    border-color: #555555;
+    background-color: #555555;
+    color: #dbdbdb;
+    cursor: not-allowed;
+}
